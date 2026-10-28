@@ -11,6 +11,7 @@ import {
   ExternalLink,
   Heart,
   Mail,
+  Menu,
   Smartphone,
   Cloud,
   Wrench,
@@ -146,6 +147,7 @@ export default function Home() {
   const [loading, setLoading] = useState(true);
   const [profileImageFailed, setProfileImageFailed] = useState(false);
   const [contactOpen, setContactOpen] = useState(false);
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [formSending, setFormSending] = useState(false);
   const [formSuccess, setFormSuccess] = useState(false);
   const [formError, setFormError] = useState('');
@@ -251,7 +253,7 @@ export default function Home() {
   const pubmatProjects = projects.filter((project) => (project.tags ?? []).some((tag) => tag.trim().toLowerCase() === 'pubmat'));
 
   return (
-    <div className="min-h-screen overflow-hidden bg-[linear-gradient(135deg,#fff0f5_0%,#fffdf9_48%,#f2efff_100%)] text-slate-800 selection:bg-pink-200">
+    <div className="min-h-screen overflow-x-hidden bg-[linear-gradient(135deg,#fff0f5_0%,#fffdf9_48%,#f2efff_100%)] text-slate-800 selection:bg-pink-200">
       <div className="pointer-events-none fixed inset-0 z-0 opacity-50 [background-image:radial-gradient(#f9a8d4_1px,transparent_1px)] [background-size:28px_28px]" />
 
       <header className="fixed inset-x-0 top-0 z-50 border-b border-pink-100/80 bg-[#fffdf9]/85 backdrop-blur-xl">
@@ -261,9 +263,20 @@ export default function Home() {
             <span>Ivy<span className="text-sm font-normal text-rose-300">.dev</span></span>
           </a>
           <div className="hidden items-center gap-3 text-xs font-semibold uppercase tracking-[0.18em] text-slate-400 md:flex"><span className="h-2 w-2 rounded-full bg-pink-400" /> Available for thoughtful collaborations</div>
-          <div className="flex items-center gap-3"><button type="button" onClick={() => setContactOpen(true)} className="hidden text-sm font-medium text-slate-600 transition hover:text-pink-500 sm:block">Contact</button><a href="/admin" aria-label="Manage portfolio data" className="flex h-10 w-10 items-center justify-center rounded-full bg-gradient-to-r from-pink-400 to-purple-400 text-white shadow-lg shadow-pink-200 transition hover:-translate-y-0.5 hover:shadow-pink-300"><Sparkles className="h-4 w-4" /></a></div>
+          <div className="flex items-center gap-3"><button type="button" onClick={() => setContactOpen(true)} className="hidden text-sm font-medium text-slate-600 transition hover:text-pink-500 sm:block">Contact</button><a href="/admin" aria-label="Manage portfolio data" className="flex h-10 w-10 items-center justify-center rounded-full bg-gradient-to-r from-pink-400 to-purple-400 text-white shadow-lg shadow-pink-200 transition hover:-translate-y-0.5 hover:shadow-pink-300"><Sparkles className="h-4 w-4" /></a><button type="button" aria-label={mobileMenuOpen ? 'Close navigation menu' : 'Open navigation menu'} aria-expanded={mobileMenuOpen} onClick={() => setMobileMenuOpen((isOpen) => !isOpen)} className="flex h-10 w-10 items-center justify-center rounded-full border border-pink-200 bg-white/80 text-pink-500 shadow-sm sm:hidden">{mobileMenuOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}</button></div>
         </div>
       </header>
+
+      {mobileMenuOpen && (
+        <nav className="fixed inset-x-0 top-[73px] z-40 border-b border-pink-100 bg-[#fffdf9]/95 px-5 py-4 shadow-lg shadow-pink-100/60 backdrop-blur-xl sm:hidden" aria-label="Mobile navigation">
+          <div className="grid gap-1 text-sm font-semibold text-slate-600">
+            {['Home', 'Projects', 'Pubmats', 'Certificates', 'Education', 'Skills'].map((item) => (
+              <a key={item} href={`#${item === 'Home' ? 'home' : item.toLowerCase()}`} onClick={() => setMobileMenuOpen(false)} className="rounded-xl px-4 py-3 transition hover:bg-pink-50 hover:text-pink-500">{item}</a>
+            ))}
+            <button type="button" onClick={() => { setMobileMenuOpen(false); setContactOpen(true); }} className="mt-2 rounded-xl bg-pink-500 px-4 py-3 text-left font-semibold text-white">Contact</button>
+          </div>
+        </nav>
+      )}
 
       {contactOpen && (
         <div
@@ -303,9 +316,9 @@ export default function Home() {
 
         <div className="min-w-0">
           <section id="home" className="grid min-h-[620px] items-center gap-12 py-10 lg:grid-cols-[1.1fr_0.9fr] lg:py-14">
-            <div className="max-w-2xl"><div className="mb-6 flex items-center gap-3 text-[10px] font-bold uppercase tracking-[0.18em] text-pink-500"><Heart className="h-3.5 w-3.5 fill-pink-400 text-pink-400" /> A digital fairy garden for curious minds</div><h1 className="whitespace-nowrap font-[Georgia,serif] text-[clamp(2.35rem,3.8vw,4.15rem)] font-bold leading-[0.92] tracking-[-0.04em] text-slate-900">Hi, I&apos;m <span className="bg-gradient-to-r from-pink-500 via-rose-400 to-purple-500 bg-clip-text text-transparent">Ivy Porcado</span><Crown className="mb-1 ml-2 inline h-[0.7em] w-[0.7em] text-amber-400" /></h1><div id="about" className="mt-8 grid gap-6 border-t border-pink-200 pt-5 sm:grid-cols-[0.8fr_1.2fr]"><h2 className="text-base font-semibold leading-snug text-pink-500">Aspiring Full-Stack Developer<br />UI/UX Designer<br />Writer</h2><p className="max-w-lg text-sm leading-relaxed text-slate-600 md:text-base">An aspiring developer learning, growing, and building with every project. I build functional web applications, design intuitive user experiences, and enjoy solving complex problems through algorithms and creative thinking. I also love turning ideas into meaningful content.</p></div><div className="mt-8 flex flex-wrap gap-3"><button type="button" onClick={() => setContactOpen(true)} className="rounded-full bg-pink-500 px-6 py-2.5 text-xs font-semibold text-white shadow-xl shadow-pink-200 transition hover:-translate-y-0.5 hover:bg-pink-600"><Mail className="mr-2 inline h-4 w-4" /> Get in Touch</button><button type="button" onClick={() => void handleResumeDownload()} disabled={resumeDownloading} className="rounded-full border border-pink-300 bg-white/80 px-5 py-2.5 text-xs font-semibold text-slate-700 shadow-sm transition hover:bg-pink-50 disabled:opacity-60"><Download className="mr-2 inline h-4 w-4 text-pink-500" /> {resumeDownloading ? 'Preparing Resume...' : 'Download Resume'}</button></div></div>
+            <div className="order-2 max-w-2xl lg:order-1"><div className="mb-6 flex items-center gap-3 text-[10px] font-bold uppercase tracking-[0.18em] text-pink-500"><Heart className="h-3.5 w-3.5 fill-pink-400 text-pink-400" /> A digital fairy garden for curious minds</div><h1 className="whitespace-nowrap font-[Georgia,serif] text-[clamp(2rem,6vw,4.15rem)] font-bold leading-tight tracking-[-0.04em] text-slate-900">Hi, I&apos;m <span className="bg-gradient-to-r from-pink-500 via-rose-400 to-purple-500 bg-clip-text text-transparent">Ivy Porcado</span><Crown className="mb-1 ml-2 inline h-[0.7em] w-[0.7em] text-amber-400" /></h1><div id="about" className="mt-8 grid gap-6 border-t border-pink-200 pt-5 sm:grid-cols-[0.8fr_1.2fr]"><h2 className="text-base font-semibold leading-snug text-pink-500">Aspiring Full-Stack Developer<br />UI/UX Designer<br />Writer</h2><p className="max-w-lg text-sm leading-relaxed text-slate-600 md:text-base">An aspiring developer learning, growing, and building with every project. I build functional web applications, design intuitive user experiences, and enjoy solving complex problems through algorithms and creative thinking. I also love turning ideas into meaningful content.</p></div><div className="mt-8 flex flex-wrap gap-3"><button type="button" onClick={() => setContactOpen(true)} className="rounded-full bg-pink-500 px-6 py-2.5 text-xs font-semibold text-white shadow-xl shadow-pink-200 transition hover:-translate-y-0.5 hover:bg-pink-600"><Mail className="mr-2 inline h-4 w-4" /> Get in Touch</button><button type="button" onClick={() => void handleResumeDownload()} disabled={resumeDownloading} className="rounded-full border border-pink-300 bg-white/80 px-5 py-2.5 text-xs font-semibold text-slate-700 shadow-sm transition hover:bg-pink-50 disabled:opacity-60"><Download className="mr-2 inline h-4 w-4 text-pink-500" /> {resumeDownloading ? 'Preparing Resume...' : 'Download Resume'}</button></div></div>
 
-            <div className="relative mx-auto w-full max-w-sm lg:rotate-3"><div className="absolute -inset-5 rounded-[3rem] bg-gradient-to-tr from-pink-300 to-purple-300 opacity-40 blur-3xl" /><div className="relative border border-white/80 bg-white/60 p-3 shadow-[0_20px_45px_rgba(236,72,153,0.2)] backdrop-blur-md"><div className="mb-3 flex items-center justify-between border-b border-pink-100 pb-2 text-[9px] font-bold uppercase tracking-[0.2em] text-pink-400"><span>Portrait / 01</span><Crown className="h-3.5 w-3.5 text-amber-400" /></div><div className="aspect-[0.84] overflow-hidden bg-gradient-to-br from-indigo-300 via-purple-300 to-pink-200">{!profileImageFailed ? <img src={profileImageUrl} alt="Ivy" className="h-full w-full object-cover" onError={() => setProfileImageFailed(true)} /> : <div className="flex h-full w-full items-center justify-center text-7xl font-black text-white/80">I</div>}</div><div className="flex items-end justify-between pt-3"><div><p className="font-[Georgia,serif] text-xl font-bold text-slate-900">Ivy Porcado</p><p className="mt-1 text-[11px] text-slate-500">Building with care &amp; a little magic</p></div><span className="rounded-full bg-pink-100 px-2.5 py-1 text-[9px] font-bold uppercase tracking-wider text-pink-500">Open for work</span></div></div></div>
+            <div className="relative order-1 mx-auto w-full max-w-sm lg:order-2 lg:rotate-3"><div className="absolute -inset-5 rounded-[3rem] bg-gradient-to-tr from-pink-300 to-purple-300 opacity-40 blur-3xl" /><div className="relative border border-white/80 bg-white/60 p-3 shadow-[0_20px_45px_rgba(236,72,153,0.2)] backdrop-blur-md"><div className="mb-3 flex items-center justify-between border-b border-pink-100 pb-2 text-[9px] font-bold uppercase tracking-[0.2em] text-pink-400"><span>Portrait / 01</span><Crown className="h-3.5 w-3.5 text-amber-400" /></div><div className="aspect-[0.84] overflow-hidden bg-gradient-to-br from-indigo-300 via-purple-300 to-pink-200">{!profileImageFailed ? <img src={profileImageUrl} alt="Ivy" className="h-full w-full object-cover" onError={() => setProfileImageFailed(true)} /> : <div className="flex h-full w-full items-center justify-center text-7xl font-black text-white/80">I</div>}</div><div className="flex items-end justify-between pt-3"><div><p className="font-[Georgia,serif] text-xl font-bold text-slate-900">Ivy Porcado</p><p className="mt-1 text-[11px] text-slate-500">Building with care &amp; a little magic</p></div><span className="rounded-full bg-pink-100 px-2.5 py-1 text-[9px] font-bold uppercase tracking-wider text-pink-500">Open for work</span></div></div></div>
           </section>
 
         <section id="projects" className="py-20">
