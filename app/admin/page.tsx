@@ -35,15 +35,6 @@ interface Education {
 
 const projectCategories = ['Web Apps', 'UI/UX Design', 'Personal', 'Pubmat'] as const;
 
-function readEducation(): Education[] {
-  if (typeof window === 'undefined') return [];
-  try {
-    return JSON.parse(window.localStorage.getItem('ivy-education') ?? '[]') as Education[];
-  } catch {
-    return [];
-  }
-}
-
 export default function AdminPage() {
   const [session, setSession] = useState<unknown>(null);
   const [loadingSession, setLoadingSession] = useState(true);
@@ -60,7 +51,7 @@ export default function AdminPage() {
   const [uploading, setUploading] = useState(false);
   const [projects, setProjects] = useState<Project[]>([]);
   const [certificates, setCertificates] = useState<Certificate[]>([]);
-  const [educationEntries, setEducationEntries] = useState<Education[]>(readEducation);
+  const [educationEntries, setEducationEntries] = useState<Education[]>([]);
   const [loadingContent, setLoadingContent] = useState(false);
 
   // Project Form
@@ -114,16 +105,22 @@ export default function AdminPage() {
     setLoadingContent(true);
     setContentError('');
 
-    const [{ data: projectData, error: projectError }, { data: certificateData, error: certificateError }] = await Promise.all([
+    const [
+      { data: projectData, error: projectError },
+      { data: certificateData, error: certificateError },
+      { data: educationData, error: educationError },
+    ] = await Promise.all([
       supabase.from('projects').select('*').order('created_at', { ascending: false }),
       supabase.from('certificates').select('*').order('created_at', { ascending: false }),
+      supabase.from('education').select('*').order('created_at', { ascending: false }),
     ]);
 
-    if (projectError || certificateError) {
-      setContentError(projectError?.message ?? certificateError?.message ?? 'Unable to load existing content.');
+    if (projectError || certificateError || educationError) {
+      setContentError(projectError?.message ?? certificateError?.message ?? educationError?.message ?? 'Unable to load existing content.');
     } else {
       setProjects(projectData ?? []);
       setCertificates(certificateData ?? []);
+      setEducationEntries(educationData ?? []);
     }
 
     setLoadingContent(false);
@@ -255,14 +252,31 @@ export default function AdminPage() {
       setEditingEducationId(null);
     }
 
-  function handleEducationSubmit(event: React.FormEvent<HTMLFormElement>) {
+  async function handleEducationSubmit(event: React.FormEvent<HTMLFormElement>) {
       event.preventDefault();
-      const entry: Education = { id: editingEducationId ?? crypto.randomUUID(), school: eSchool, course: eCourse, graduation: eGraduation, coursework: eCoursework, organization: eOrganization, award: eAward };
-      const nextEntries = editingEducationId ? educationEntries.map((item) => item.id === editingEducationId ? entry : item) : [...educationEntries, entry];
-      setEducationEntries(nextEntries);
-      window.localStorage.setItem('ivy-education', JSON.stringify(nextEntries));
+      setStatusMsg('');
+
+      const educationData = {
+        school: eSchool,
+        course: eCourse,
+        graduation: eGraduation,
+        coursework: eCoursework,
+        organization: eOrganization,
+        award: eAward,
+      };
+      const query = editingEducationId
+        ? supabase.from('education').update(educationData).eq('id', editingEducationId)
+        : supabase.from('education').insert([educationData]);
+      const { error } = await query;
+
+      if (error) {
+        setStatusMsg(`Error: ${error.message}`);
+        return;
+      }
+
       setStatusMsg(editingEducationId ? 'Education updated successfully.' : 'Education added successfully.');
       resetEducationForm();
+      await fetchExistingContent();
     }
 
   function editEducation(entry: Education) {
@@ -277,13 +291,19 @@ export default function AdminPage() {
       setStatusMsg('');
     }
 
-  function deleteEducation(entry: Education) {
+  async function deleteEducation(entry: Education) {
       if (!window.confirm(`Delete education entry from "${entry.school}"?`)) return;
-      const nextEntries = educationEntries.filter((item) => item.id !== entry.id);
-      setEducationEntries(nextEntries);
-      window.localStorage.setItem('ivy-education', JSON.stringify(nextEntries));
+
+      setStatusMsg('');
+      const { error } = await supabase.from('education').delete().eq('id', entry.id);
+      if (error) {
+        setStatusMsg(`Error: ${error.message}`);
+        return;
+      }
+
       if (editingEducationId === entry.id) resetEducationForm();
       setStatusMsg('Education deleted successfully.');
+      await fetchExistingContent();
     }
 
   function editProject(project: Project) {
@@ -420,7 +440,7 @@ export default function AdminPage() {
         <div className="flex flex-col gap-4 rounded-2xl border border-pink-100 bg-white/85 p-5 shadow-sm backdrop-blur-md sm:flex-row sm:items-center sm:justify-between">
           <div className="flex items-center gap-3">
             <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-pink-100 text-pink-500"><Lock className="h-5 w-5" /></div>
-            <div><h1 className="font-[Georgia,serif] text-xl font-bold text-slate-900">Portfolio Data Manager 🎀</h1><p className="text-[11px] text-slate-500">Live LocalStorage CRUD - Changes update automatically</p></div>
+            <div><h1 className="font-[Georgia,serif] text-xl font-bold text-slate-900">Portfolio Data Manager 🎀</h1><p className="text-[11px] text-slate-500">Live Supabase CRUD - Changes update automatically</p></div>
           </div>
           <div className="flex items-center gap-4">
             <Link href="/" className="inline-flex items-center gap-1 text-xs font-semibold text-pink-600 transition hover:text-pink-800">

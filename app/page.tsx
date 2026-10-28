@@ -19,7 +19,9 @@ import {
   Send,
   Sparkles,
   X,
+  Bot,
 } from 'lucide-react';
+import { FaDiscord, FaFacebookF, FaGithub, FaInstagram } from 'react-icons/fa';
 
 interface Project {
   id: string;
@@ -112,14 +114,21 @@ const skillCategories = [
     title: 'Design & Developer Tools',
     icon: Wrench,
     items: [
-      { label: 'Radix UI', value: 52 },
-      { label: 'Responsive Design', value: 80 },
-      { label: 'Accessibility', value: 86 },
       { label: 'Git', value: 84 },
       { label: 'GitHub', value: 84 },
       { label: 'Figma/UI Design', value: 90 },
-      { label: 'PDF generation', value: 72 },
-      { label: 'File uploads', value: 78 },
+      { label: 'Formspree', value: 72 },
+      { label: 'Vercel', value: 78 },
+    ],
+  },
+  {
+    title: 'AI Tools and Platforms',
+    icon: Bot,
+    items: [
+      { label: 'Claude', value: 74 },
+      { label: 'ChatGPT', value: 80 },
+      { label: 'Gemini', value: 79 },
+      { label: 'Copilot', value: 91 },
     ],
   },
 ];
@@ -135,9 +144,10 @@ const projectFilters = ['All Projects', 'Web Apps', 'UI/UX Design', 'Personal'] 
 type ProjectFilter = (typeof projectFilters)[number];
 
 const socialLinks = [
-  { label: 'Facebook', href: 'https://www.facebook.com/ivy.riorosa', icon: 'f', style: 'bg-[#1877f2] text-white' },
-  { label: 'Instagram', href: 'https://www.instagram.com/itz.yviien?Y29heHJqbmZmNGNh', icon: '◎', style: 'bg-gradient-to-br from-purple-600 via-pink-500 to-orange-400 text-white' },
-  { label: 'Discord', href: 'https://discord.com/users/ivyvitwives_74109', icon: '☁', style: 'bg-[#5865f2] text-white' },
+  { label: 'Facebook', href: 'https://www.facebook.com/ivy.riorosa', icon: FaFacebookF, style: 'bg-[#1877f2] text-white' },
+  { label: 'Instagram', href: 'https://www.instagram.com/itz.yviien?Y29heHJqbmZmNGNh', icon: FaInstagram, style: 'bg-gradient-to-br from-purple-600 via-pink-500 to-orange-400 text-white' },
+  { label: 'Discord', href: 'https://discord.com/users/ivyvitwives_74109', icon: FaDiscord, style: 'bg-[#5865f2] text-white' },
+  { label: 'GitHub', href: 'https://github.com/Ivivitwives', icon: FaGithub, style: 'bg-slate-900 text-white' },
 ];
 
 export default function Home() {
@@ -155,15 +165,20 @@ export default function Home() {
   const [projectFilter, setProjectFilter] = useState<ProjectFilter>('All Projects');
   const [projectSearch, setProjectSearch] = useState('');
 
-  async function fetchData() {
-    setLoading(true);
-    const { data: projData } = await supabase.from('projects').select('*').order('created_at', { ascending: false });
-    const { data: certData } = await supabase.from('certificates').select('*').order('created_at', { ascending: false });
+ async function fetchData() {
+  setLoading(true);
+  const { data: projData } = await supabase.from('projects').select('*').order('created_at', { ascending: false });
+  const { data: certData } = await supabase.from('certificates').select('*').order('created_at', { ascending: false });
+  // 1. Fetch education entries from Supabase
+  const { data: eduData } = await supabase.from('education').select('*').order('created_at', { ascending: false });
 
-    if (projData) setProjects(projData);
-    if (certData) setCertificates(certData);
-    setLoading(false);
-  }
+  if (projData) setProjects(projData);
+  if (certData) setCertificates(certData);
+  // 2. Set education state from database response
+  if (eduData) setEducationEntries(eduData);
+
+  setLoading(false);
+}
 
   async function handleResumeDownload() {
     setResumeDownloading(true);
@@ -298,7 +313,7 @@ export default function Home() {
             <div className="mt-6 grid gap-3">
               {socialLinks.map((social) => (
                 <a key={social.label} href={social.href} target="_blank" rel="noreferrer" className="flex items-center gap-3 rounded-2xl border border-pink-100 bg-white px-4 py-3 text-sm font-semibold text-slate-700 shadow-sm transition hover:-translate-y-0.5 hover:border-pink-300 hover:shadow-md">
-                  <span className={`flex h-9 w-9 items-center justify-center rounded-xl text-lg font-bold ${social.style}`}>{social.icon}</span>
+                  <span className={`flex h-9 w-9 items-center justify-center rounded-xl text-lg font-bold ${social.style}`}><social.icon aria-hidden="true" /></span>
                   <span>Visit my {social.label}</span>
                   <ExternalLink className="ml-auto h-4 w-4 text-pink-400" />
                 </a>
@@ -316,7 +331,7 @@ export default function Home() {
 
         <div className="min-w-0">
           <section id="home" className="grid min-h-[620px] items-center gap-12 py-10 lg:grid-cols-[1.1fr_0.9fr] lg:py-14">
-            <div className="order-2 max-w-2xl lg:order-1"><div className="mb-6 flex items-center gap-3 text-[10px] font-bold uppercase tracking-[0.18em] text-pink-500"><Heart className="h-3.5 w-3.5 fill-pink-400 text-pink-400" /> A digital fairy garden for curious minds</div><h1 className="whitespace-nowrap font-[Georgia,serif] text-[clamp(2rem,6vw,4.15rem)] font-bold leading-tight tracking-[-0.04em] text-slate-900">Hi, I&apos;m <span className="bg-gradient-to-r from-pink-500 via-rose-400 to-purple-500 bg-clip-text text-transparent">Ivy Porcado</span><Crown className="mb-1 ml-2 inline h-[0.7em] w-[0.7em] text-amber-400" /></h1><div id="about" className="mt-8 grid gap-6 border-t border-pink-200 pt-5 sm:grid-cols-[0.8fr_1.2fr]"><h2 className="text-base font-semibold leading-snug text-pink-500">Aspiring Full-Stack Developer<br />UI/UX Designer<br />Writer</h2><p className="max-w-lg text-sm leading-relaxed text-slate-600 md:text-base">An aspiring developer learning, growing, and building with every project. I build functional web applications, design intuitive user experiences, and enjoy solving complex problems through algorithms and creative thinking. I also love turning ideas into meaningful content.</p></div><div className="mt-8 flex flex-wrap gap-3"><button type="button" onClick={() => setContactOpen(true)} className="rounded-full bg-pink-500 px-6 py-2.5 text-xs font-semibold text-white shadow-xl shadow-pink-200 transition hover:-translate-y-0.5 hover:bg-pink-600"><Mail className="mr-2 inline h-4 w-4" /> Get in Touch</button><button type="button" onClick={() => void handleResumeDownload()} disabled={resumeDownloading} className="rounded-full border border-pink-300 bg-white/80 px-5 py-2.5 text-xs font-semibold text-slate-700 shadow-sm transition hover:bg-pink-50 disabled:opacity-60"><Download className="mr-2 inline h-4 w-4 text-pink-500" /> {resumeDownloading ? 'Preparing Resume...' : 'Download Resume'}</button></div></div>
+            <div className="order-2 max-w-2xl lg:order-1"><div className="mb-6 flex items-center gap-3 text-[10px] font-bold uppercase tracking-[0.18em] text-pink-500"><Heart className="h-3.5 w-3.5 fill-pink-400 text-pink-400" /> A digital fairy garden for curious minds</div><h1 className="whitespace-nowrap font-[Georgia,serif] text-[clamp(2rem,6vw,4.15rem)] font-bold leading-tight tracking-[-0.04em] text-slate-900">Hi, I&apos;m <span className="bg-gradient-to-r from-pink-500 via-rose-400 to-purple-500 bg-clip-text text-transparent">Ivy Porcado</span><Crown className="mb-1 ml-2 inline h-[0.7em] w-[0.7em] text-amber-400" /></h1><div id="about" className="mt-8 grid gap-6 border-t border-pink-200 pt-5 sm:grid-cols-[0.8fr_1.2fr]"><h2 className="text-base font-semibold leading-snug text-pink-500">Aspiring Full-Stack Developer<br />UI/UX Designer<br />Writer</h2><p className="max-w-lg text-sm leading-relaxed text-slate-600 md:text-base">An aspiring developer learning, growing, and building with every project. I build functional web applications, design intuitive user experiences, and enjoy solving complex problems through algorithms and creative thinking. I also love turning ideas into meaningful content. All my work is with the help of AI as a learning and development tool.</p></div><div className="mt-8 flex flex-wrap gap-3"><button type="button" onClick={() => setContactOpen(true)} className="rounded-full bg-pink-500 px-6 py-2.5 text-xs font-semibold text-white shadow-xl shadow-pink-200 transition hover:-translate-y-0.5 hover:bg-pink-600"><Mail className="mr-2 inline h-4 w-4" /> Get in Touch</button><button type="button" onClick={() => void handleResumeDownload()} disabled={resumeDownloading} className="rounded-full border border-pink-300 bg-white/80 px-5 py-2.5 text-xs font-semibold text-slate-700 shadow-sm transition hover:bg-pink-50 disabled:opacity-60"><Download className="mr-2 inline h-4 w-4 text-pink-500" /> {resumeDownloading ? 'Preparing Resume...' : 'Download Resume'}</button></div></div>
 
             <div className="relative order-1 mx-auto w-full max-w-sm lg:order-2 lg:rotate-3"><div className="absolute -inset-5 rounded-[3rem] bg-gradient-to-tr from-pink-300 to-purple-300 opacity-40 blur-3xl" /><div className="relative border border-white/80 bg-white/60 p-3 shadow-[0_20px_45px_rgba(236,72,153,0.2)] backdrop-blur-md"><div className="mb-3 flex items-center justify-between border-b border-pink-100 pb-2 text-[9px] font-bold uppercase tracking-[0.2em] text-pink-400"><span>Portrait / 01</span><Crown className="h-3.5 w-3.5 text-amber-400" /></div><div className="aspect-[0.84] overflow-hidden bg-gradient-to-br from-indigo-300 via-purple-300 to-pink-200">{!profileImageFailed ? <img src={profileImageUrl} alt="Ivy" className="h-full w-full object-cover" onError={() => setProfileImageFailed(true)} /> : <div className="flex h-full w-full items-center justify-center text-7xl font-black text-white/80">I</div>}</div><div className="flex items-end justify-between pt-3"><div><p className="font-[Georgia,serif] text-xl font-bold text-slate-900">Ivy Porcado</p><p className="mt-1 text-[11px] text-slate-500">Building with care &amp; a little magic</p></div><span className="rounded-full bg-pink-100 px-2.5 py-1 text-[9px] font-bold uppercase tracking-wider text-pink-500">Open for work</span></div></div></div>
           </section>
@@ -393,7 +408,7 @@ export default function Home() {
           )}
         </section>
 
-        <section id="education" className="py-20"><div className="mx-auto mb-12 max-w-2xl text-center"><span className="text-sm font-bold uppercase tracking-[0.2em] text-pink-500">🎓 Learning journey</span><h2 className="mt-3 font-[Georgia,serif] text-4xl font-bold text-slate-900 md:text-5xl">Education</h2><p className="mt-3 text-sm leading-relaxed text-slate-600">The schools, programs, coursework, and communities that shaped my path.</p></div>{educationEntries.length === 0 ? <p className="text-center italic text-slate-400">Education details will appear here soon.</p> : <div className="grid gap-6 md:grid-cols-2">{educationEntries.map((entry) => <article key={entry.id} className="rounded-2xl border border-pink-200 bg-white/70 p-6 shadow-sm backdrop-blur-md"><div className="flex items-start justify-between gap-4"><div><h3 className="font-[Georgia,serif] text-xl font-bold text-slate-900">{entry.school}</h3><p className="mt-1 text-sm font-semibold text-pink-500">{entry.course}</p></div><span className="shrink-0 rounded-full bg-pink-50 px-3 py-1 text-xs font-semibold text-pink-600">{entry.graduation}</span></div>{entry.coursework && <div className="mt-5 border-t border-pink-100 pt-4"><p className="text-[11px] font-bold uppercase tracking-[0.16em] text-pink-400">Relevant coursework</p><p className="mt-1 text-sm leading-relaxed text-slate-600">{entry.coursework}</p></div>}{(entry.organization || entry.award) && <div className="mt-4 flex flex-wrap gap-2">{entry.organization && <span className="rounded-full bg-pink-50 px-3 py-1.5 text-xs font-medium text-slate-600">{entry.organization}</span>}{entry.award && <span className="rounded-full bg-pink-50 px-3 py-1.5 text-xs font-medium text-slate-600">{entry.award}</span>}</div>}</article>)}</div>}</section>
+        <section id="education" className="py-20"><div className="mx-auto mb-12 max-w-2xl text-center"><span className="text-sm font-bold uppercase tracking-[0.2em] text-pink-500">🎓 Learning journey</span><h2 className="mt-3 font-[Georgia,serif] text-4xl font-bold text-slate-900 md:text-5xl">Education</h2><p className="mt-3 text-sm leading-relaxed text-slate-600">The schools, programs, coursework, and communities that shaped my path.</p></div>{educationEntries.length === 0 ? <p className="text-center italic text-slate-400">Education details will appear here soon.</p> : <div className="grid gap-6 md:grid-cols-2">{educationEntries.map((entry) => <article key={entry.id} tabIndex={0} className="group rounded-2xl border border-pink-200 bg-white/70 p-6 shadow-sm backdrop-blur-md outline-none transition duration-300 hover:-translate-y-1 hover:scale-[1.01] hover:border-pink-300 hover:shadow-xl hover:shadow-pink-100 focus-visible:-translate-y-1 focus-visible:border-pink-300 focus-visible:ring-2 focus-visible:ring-pink-300 active:scale-[0.99]"><div className="flex items-start justify-between gap-4"><div><h3 className="font-[Georgia,serif] text-xl font-bold text-slate-900 transition-colors group-hover:text-pink-500">{entry.school}</h3><p className="mt-1 text-sm font-semibold text-pink-500">{entry.course}</p></div><span className="shrink-0 rounded-full bg-pink-50 px-3 py-1 text-xs font-semibold text-pink-600">{entry.graduation}</span></div>{entry.coursework && <div className="mt-5 border-t border-pink-100 pt-4"><p className="text-[11px] font-bold uppercase tracking-[0.16em] text-pink-400">Relevant coursework</p><p className="mt-1 text-sm leading-relaxed text-slate-600">{entry.coursework}</p></div>}{(entry.organization || entry.award) && <div className="mt-4 flex flex-wrap gap-2">{entry.organization && <span className="rounded-full bg-pink-50 px-3 py-1.5 text-xs font-medium text-slate-600">{entry.organization}</span>}{entry.award && <span className="rounded-full bg-pink-50 px-3 py-1.5 text-xs font-medium text-slate-600">{entry.award}</span>}</div>}</article>)}</div>}</section>
 
         <section id="skills" className="py-20"><div className="mx-auto mb-12 max-w-2xl text-center"><span className="text-sm font-bold uppercase tracking-[0.2em] text-pink-500">🎀 Tech Magic</span><h2 className="mt-3 font-[Georgia,serif] text-4xl font-bold text-slate-900 md:text-5xl">Skills &amp; Toolstack 🎀</h2><p className="mt-3 text-sm leading-relaxed text-slate-600">Technologies and creative tools I love working with every single day.</p></div><div className="grid gap-6 md:grid-cols-2">
             {skillCategories.map(({ title, icon: Icon, items }) => (
