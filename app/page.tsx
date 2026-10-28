@@ -59,7 +59,7 @@ interface StoredResume {
 
 // Updated to portfolio-assets (plural)
 const profileImageUrl =
-  'https://vcxilrgahparhpifrkkd.supabase.co/storage/v1/object/public/portfolio-asset/2586021f-3394-42c4-8407-31f5a7f048b6%20-%20Copy.jfif';
+  'https://vcxilrgahparhpifrkkd.supabase.co/storage/v1/object/public/portfolio-assets/862399625_1801307107743166_4011689288237666100_n.jpg';
 
 const skillCategories = [
   {
